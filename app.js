@@ -51,21 +51,27 @@ $('#search').on('input', function () {
 
 // Function to sort the Pokemons
 function sort() {
-   let selectedOption = $('#sortby').val();
-   let [type, order] = selectedOption.split('_');
+   const selectedOption = $('#sort').val();
 
+   // Validate selectedOption to prevent unexpected errors
+   if (!selectedOption) {
+      return;
+   }
+
+   const [type, order] = selectedOption.split('_');
    switch (type) {
       case 'id-no':
+
          if (order === 'ascending') {
             $('#card_list').children().sort((a, b) => {
-               let aId = parseInt($(a).find('p').text().slice(1));
-               let bId = parseInt($(b).find('p').text().slice(1));
+               const aId = parseInt($(a).find('p').text().slice(1));
+               const bId = parseInt($(b).find('p').text().slice(1));
                return aId - bId;
             }).appendTo('#card_list');
          } else if (order === 'descending') {
             $('#card_list').children().sort((a, b) => {
-               let aId = parseInt($(a).find('p').text().slice(1));
-               let bId = parseInt($(b).find('p').text().slice(1));
+               const aId = parseInt($(a).find('p').text().slice(1));
+               const bId = parseInt($(b).find('p').text().slice(1));
                return bId - aId;
             }).appendTo('#card_list');
          }
@@ -73,14 +79,14 @@ function sort() {
       case 'name':
          if (order === 'ascending') {
             $('#card_list').children().sort((a, b) => {
-               let aName = $(a).find('h1').text().toLowerCase();
-               let bName = $(b).find('h1').text().toLowerCase();
+               const aName = $(a).find('h1').text().toLowerCase();
+               const bName = $(b).find('h1').text().toLowerCase();
                return aName.localeCompare(bName);
             }).appendTo('#card_list');
          } else if (order === 'descending') {
             $('#card_list').children().sort((a, b) => {
-               let aName = $(a).find('h1').text().toLowerCase();
-               let bName = $(b).find('h1').text().toLowerCase();
+               const aName = $(a).find('h1').text().toLowerCase();
+               const bName = $(b).find('h1').text().toLowerCase();
                return bName.localeCompare(aName);
             }).appendTo('#card_list');
          }
@@ -91,11 +97,11 @@ function sort() {
 }
 
 // Add event listener for select element
-$('#sortby').change(function () {
+$('#sort').on('change', function () {
    sort();
-});
+}); console.log
 
-// Show the Pokemons
+// Function to show the cards
 function showCards() {
    const cardDetail = $('#details');
 
@@ -105,13 +111,33 @@ function showCards() {
       }
       $('#details').addClass('hidden');
       $('#searchbar').removeClass('hidden');
-      $('#sortby').removeClass('hidden');
-
-      $('#cards').show();
-   } else {
-      // The card list is already showing, so don't do anything
-      return;
+      $('#sort-form').removeClass('hidden');
    }
+
+   // Get the selected value of the sort-form
+   const sortBy = $('#sort').val();
+
+   // Sort the cards based on the selected value
+   let cards = $('#cards .card').toArray();
+   switch (sortBy) {
+      case 'id-no_ascending':
+         cards.sort((a, b) => a.getAttribute('data-id-no') - b.getAttribute('data-id-no'));
+         break;
+      case 'id-no_descending':
+         cards.sort((a, b) => b.getAttribute('data-id-no') - a.getAttribute('data-id-no'));
+         break;
+      case 'name_ascending':
+         cards.sort((a, b) => a.getAttribute('data-name').localeCompare(b.getAttribute('data-name')));
+         break;
+      case 'name_descending':
+         cards.sort((a, b) => b.getAttribute('data-name').localeCompare(a.getAttribute('data-name')));
+         break;
+      default:
+         break;
+   }
+
+   $('#cards').append(cards); // Append the sorted cards to the card container
+   $('#cards').show();
 
    showCardDetails = false;
 }
@@ -122,7 +148,7 @@ function showDetails(id) {
    $('#cards').hide();
    $('#details').removeClass('hidden');
    $('#searchbar').addClass('hidden');
-   $('#sortby').addClass('hidden');
+   $('#sort-form').addClass('hidden');
    showCardDetails = true;
 
    getInformation(id);
@@ -169,6 +195,7 @@ function nextPokemon() {
 // Function to get the Pokemon information
 async function getInformation(id) {
    let imageUrl = `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${id}.png`;
+   console.log(imageUrl);
    $('#pokemon-image').attr('src', imageUrl);
 
    $.get(`${apiURL}pokemon/${id}`, function (pokemonData) {
